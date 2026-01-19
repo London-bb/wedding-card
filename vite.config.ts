@@ -13,7 +13,8 @@ export default defineConfig(({ mode }) => {
     plugins: [react(), tailwindcss()],
     define: {
       'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+      'process.env.KAKAO_JAVASCRIPT_KEY': JSON.stringify(env.KAKAO_JAVASCRIPT_KEY)
     },
     resolve: {
       alias: {

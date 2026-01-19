@@ -1,42 +1,80 @@
-import React from 'react';
-import { Share2 } from 'lucide-react';
-import { COUPLE } from '../constants';
+import React, { useEffect } from 'react';
+import { Heart, MessageCircle } from 'lucide-react';
+import { COUPLE, WEDDING_DATE, LOCATION } from '../constants';
+
+declare global {
+  interface Window {
+    Kakao: any;
+  }
+}
 
 const Footer: React.FC = () => {
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `${COUPLE.groom.firstName} & ${COUPLE.bride.firstName}'s Wedding`,
-          text: 'We invite you to our wedding!',
-          url: window.location.href,
-        });
-      } catch (error) {
-        console.log('Error sharing:', error);
-      }
-    } else {
-      alert('Link copied to clipboard!');
-      navigator.clipboard.writeText(window.location.href);
+  const groomName = COUPLE.groom.firstName;
+  const brideName = COUPLE.bride.firstName;
+
+  useEffect(() => {
+    // Initialize Kakao SDK
+    const kakaoKey = process.env.KAKAO_JAVASCRIPT_KEY;
+    if (window.Kakao && !window.Kakao.isInitialized() && kakaoKey) {
+      window.Kakao.init(kakaoKey);
     }
+  }, []);
+
+  const handleKakaoShare = () => {
+    if (!window.Kakao) return;
+
+    window.Kakao.Share.sendDefault({
+      objectType: 'feed',
+      content: {
+        title: `${groomName} ♥ ${brideName} 결혼합니다`,
+        description: `${WEDDING_DATE.getFullYear()}년 ${WEDDING_DATE.getMonth() + 1}월 ${WEDDING_DATE.getDate()}일\n${LOCATION.name}`,
+        imageUrl: 'https://picsum.photos/800/1200?random=10', // Using existing hero-like image
+        link: {
+          mobileWebUrl: window.location.href,
+          webUrl: window.location.href,
+        },
+      },
+      buttons: [
+        {
+          title: '청첩장 보기',
+          link: {
+            mobileWebUrl: window.location.href,
+            webUrl: window.location.href,
+          },
+        },
+      ],
+    });
   };
 
   return (
-    <footer className="bg-stone-100 py-10 px-4 text-center">
-      <div className="mb-8">
-        <button 
-          onClick={handleShare}
-          className="inline-flex items-center gap-2 text-stone-600 border border-stone-300 px-6 py-2 rounded-full hover:bg-white transition-colors text-sm"
+    <footer className="py-20 px-6 text-center bg-stone-50">
+      <div className="flex justify-center gap-4 mb-10">
+        <button
+          onClick={handleKakaoShare}
+          className="flex flex-col items-center gap-2 group"
         >
-          <Share2 size={16} />
-          Share Invitation
+          <div className="w-12 h-12 bg-[#FEE500] rounded-full flex items-center justify-center text-[#3C1E1E] shadow-sm group-hover:scale-110 transition-transform">
+            <MessageCircle size={24} fill="currentColor" />
+          </div>
+          <span className="text-xs text-stone-500">카카오톡 공유</span>
         </button>
       </div>
-      
+
+      <div className="flex flex-col items-center justify-center space-y-4 mb-8">
+        <div className="text-stone-300">
+          <Heart size={20} fill="currentColor" />
+        </div>
+
+        <div className="font-serif text-lg tracking-widest text-stone-800">
+          {groomName} & {brideName}
+        </div>
+      </div>
+
       <p className="text-stone-400 text-xs font-light">
-        © 2025 {COUPLE.groom.firstName} & {COUPLE.bride.firstName}. All rights reserved.
+        © 2026 {COUPLE.groom.firstName} & {COUPLE.bride.firstName}. All rights reserved.
       </p>
       <p className="text-stone-300 text-[10px] mt-2">
-        Designed with Love
+        Designed by {COUPLE.groom.name}{COUPLE.groom.firstName}
       </p>
     </footer>
   );

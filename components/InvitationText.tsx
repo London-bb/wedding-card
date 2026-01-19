@@ -10,7 +10,7 @@ const InvitationText: React.FC = () => {
           <Heart size={24} fill="currentColor" />
         </div>
 
-        <h2 className="text-3xl font-serif text-stone-800 mb-6">Invitation</h2>
+        <h2 className="text-3xl font-serif text-stone-800 mb-6">당신을 초대합니다.</h2>
 
         <p className="whitespace-pre-line text-stone-600 leading-loose font-light text-lg">
           {INVITATION_TEXT}
