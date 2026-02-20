@@ -1,4 +1,5 @@
 import React from 'react';
+import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import InvitationText from './components/InvitationText';
 import Gallery from './components/Gallery';
@@ -15,49 +16,60 @@ import Footer from './components/Footer';
 
 function App() {
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-800 lg:flex lg:h-screen lg:overflow-hidden">
+    <div className="min-h-screen bg-stone-50 text-stone-800 font-sans selection:bg-rose-100">
+      <Navbar />
       <BackgroundMusic />
       <FallingPetals />
 
-      {/* Desktop Left Panel (Hero Cover) */}
-      <div className="hidden lg:block lg:w-1/2 relative overflow-hidden h-full">
-        <div className="absolute inset-0">
-          <img
-            src="https://picsum.photos/800/1200?random=10"
-            alt="Wedding Cover"
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-black/20" />
-        </div>
-        <div className="relative z-10 flex flex-col items-center justify-center h-full text-white text-center p-12">
-          <h1 className="font-script text-9xl mb-4 text-white drop-shadow-lg">
-            We Are<br />Married
-          </h1>
-          <p className="text-2xl font-serif tracking-widest mt-8">
-            MAY 23, 2026
-          </p>
-        </div>
-      </div>
+      {/* Hero Section (Full Width) */}
+      <Hero />
 
-      {/* Main Content Area (Scrollable on Desktop) */}
-      <div className="lg:w-1/2 lg:h-full lg:overflow-y-auto no-scrollbar relative w-full">
-        <main className="w-full max-w-md md:max-w-2xl lg:max-w-full mx-auto bg-white shadow-2xl lg:shadow-none min-h-screen relative overflow-hidden lg:min-h-0">
-          <Hero />
-          <InvitationText />
-          <Calendar />
-          <Countdown />
-          <Gallery />
-          <Location />
-          <Accounts />
-          <GuestbookAI />
-          <Footer />
+      {/* Main Content Area */}
+      <main className="w-full relative z-10">
 
-          {/* Floating RSVP Button (Simulated) */}
-          <div className="fixed bottom-6 right-6 z-40 md:absolute md:right-[-80px] md:bottom-10">
-            {/* ... */}
+        {/* Invitation & Calendar Grid */}
+        <section id="invitation" className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
+            <div className="mb-12 lg:mb-0">
+              <InvitationText />
+            </div>
+            <div className="space-y-8">
+              <Calendar />
+              <Countdown />
+            </div>
           </div>
-        </main>
-      </div>
+        </section>
+
+        {/* Gallery Section */}
+        <section id="gallery" className="bg-white py-20">
+          <Gallery />
+        </section>
+
+        {/* Location & Contact Grid */}
+        <section id="location" className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-stone-50">
+          <div className="lg:grid lg:grid-cols-3 lg:gap-12">
+            <div className="lg:col-span-2">
+              <Location />
+            </div>
+            <div className="mt-12 lg:mt-0 lg:col-span-1 lg:flex lg:flex-col lg:justify-center">
+              <ContactHost />
+              <div className="mt-8">
+                <Accounts />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Guestbook Section */}
+        <section id="guestbook" className="bg-rose-50/50 py-20">
+          <div className="max-w-4xl mx-auto px-4">
+            <GuestbookAI />
+          </div>
+        </section>
+      </main>
+
+      <Footer />
+      <ShareButton />
     </div>
   );
 }

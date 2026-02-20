@@ -31,11 +31,11 @@ const BackgroundMusic: React.FC = () => {
     };
 
     return (
-        <div className="fixed top-4 right-4 z-50">
+        <div className="fixed bottom-4 left-4 z-50">
             <button
                 onClick={togglePlay}
                 className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all ${isPlaying ? 'bg-rose-400 text-white animate-spin-slow' : 'bg-white/80 text-stone-600'}`}
-                aria-label="Toggle AI"
+                aria-label="Toggle Music"
             >
                 {isPlaying ? <Pause size={16} /> : <Music size={16} />}
             </button>
