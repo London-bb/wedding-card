@@ -23,7 +23,7 @@ export const LOCATION = {
   address: "서울특별시 구로구 새말로 97",
   lat: 37.507084,
   lng: 126.887693,
-  kakaoPlaceUrl: "https://place.map.kakao.com/26330155", // 웨딩시티 신도림 카카오맵 URL
+  kakaoPlaceUrl: "https://kko.to/6d3Q_tawzl", // 웨딩시티 신도림 카카오맵 URL
   mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3165.036921674934!2d126.88764357714423!3d37.50704732753518!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x357c9e6937008aa5%3A0x264f4474edc5342a!2z7Juo65Sp7Iuc7YuwIOyLoOuPhOumvOygkA!5e0!3m2!1sko!2skr!4v1768811784712!5m2!1sko!2skr"
 };
 

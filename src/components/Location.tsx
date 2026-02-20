@@ -30,47 +30,51 @@ const Location: React.FC = () => {
     let timer: NodeJS.Timeout;
 
     const initMap = () => {
-      if (!window.kakao || !window.kakao.maps) return;
+      const container = document.getElementById('map');
+      if (!container || !window.kakao || !window.kakao.maps) return;
 
-      window.kakao.maps.load(() => {
-        const container = document.getElementById('kakao-map');
-        if (!container) return;
-
+      const performInit = () => {
         // 기존 내용 청소
         container.innerHTML = '';
 
+        const lat = Number(LOCATION.lat);
+        const lng = Number(LOCATION.lng);
+        const center = new window.kakao.maps.LatLng(lat, lng);
+
         const options = {
-          center: new window.kakao.maps.LatLng(LOCATION.lat, LOCATION.lng),
+          center: center,
           level: 4,
         };
 
         const map = new window.kakao.maps.Map(container, options);
 
         // 마커 표시
-        const markerPosition = new window.kakao.maps.LatLng(LOCATION.lat, LOCATION.lng);
         const marker = new window.kakao.maps.Marker({
-          position: markerPosition
+          position: center
         });
         marker.setMap(map);
 
         // 커스텀 오버레이 표시
         const customOverlay = new window.kakao.maps.CustomOverlay({
-          position: markerPosition,
+          position: center,
           content: OVERLAY_CONTENT(LOCATION.name),
           yAnchor: 2.4,
         });
         customOverlay.setMap(map);
 
-        // 줌 컨트롤 추가
-        const zoomControl = new window.kakao.maps.ZoomControl();
-        map.addControl(zoomControl, window.kakao.maps.ControlPosition.RIGHT);
-
         // 지도 크기 재계산 (React 렌더링 타이밍 이슈 방지)
         setTimeout(() => {
           map.relayout();
-          map.setCenter(markerPosition);
+          map.setCenter(center);
         }, 100);
-      });
+      };
+
+      // autoload=false 일 경우 load() 필요, 아닐 경우 바로 실행
+      if (window.kakao.maps.load) {
+        window.kakao.maps.load(performInit);
+      } else {
+        performInit();
+      }
     };
 
     if (activeTab === 'kakao') {
