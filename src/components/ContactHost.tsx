@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Phone, MessageCircle, ChevronDown, ChevronUp } from 'lucide-react';
-import { CONTACTS, COUPLE } from '../constants';
+import { CONTACTS, COUPLE } from '@/config/constants';
 
 const ContactHost: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false);

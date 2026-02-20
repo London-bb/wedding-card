@@ -1,5 +1,5 @@
 import React from 'react';
-import { COUPLE, WEDDING_DATE, COVER_IMAGE } from '../constants';
+import { COUPLE, WEDDING_DATE, COVER_IMAGE } from '@/config/constants';
 
 const Hero: React.FC = () => {
   const formattedDate = WEDDING_DATE.toLocaleDateString('en-US', {

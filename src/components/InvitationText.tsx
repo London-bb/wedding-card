@@ -1,5 +1,5 @@
 import React from 'react';
-import { INVITATION_TEXT, COUPLE } from '../constants';
+import { INVITATION_TEXT, COUPLE } from '@/config/constants';
 import { Heart } from 'lucide-react';
 
 const InvitationText: React.FC = () => {

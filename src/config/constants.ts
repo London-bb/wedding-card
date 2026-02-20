@@ -1,4 +1,4 @@
-import { BankAccount, ContactInfo, GalleryImage } from './types';
+import { BankAccount, ContactInfo, GalleryImage } from '@/types/types';
 
 export const COUPLE = {
   groom: {

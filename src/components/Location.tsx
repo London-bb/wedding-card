@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { LOCATION } from '../constants';
+import { LOCATION } from '@/config/constants';
 import { MapPin, Navigation } from 'lucide-react';
 
 // 카카오맵 커스텀 오버레이 내용 (HTML 문자열)

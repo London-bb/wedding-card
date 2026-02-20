@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { generateWeddingWish } from '../services/geminiService';
-import { saveMessage, GuestMessage } from '../services/guestbookService';
-import { COUPLE } from '../constants';
+import { generateWeddingWish } from '@/services/geminiService';
+import { saveMessage, GuestMessage } from '@/services/guestbookService';
+import { COUPLE } from '@/config/constants';
 import { Sparkles, Loader2, Send } from 'lucide-react';
 
 const GuestbookAI: React.FC = () => {

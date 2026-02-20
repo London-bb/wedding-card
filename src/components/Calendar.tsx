@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Heart } from 'lucide-react';
-import { WEDDING_DATE } from '../constants';
+import { WEDDING_DATE } from '@/config/constants';
 
 const Calendar: React.FC = () => {
     const { year, month, daysInMonth, startDay, weddingDay } = useMemo(() => {

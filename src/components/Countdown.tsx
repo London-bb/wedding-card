@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { WEDDING_DATE } from '../constants';
+import { WEDDING_DATE } from '@/config/constants';
 
 const Countdown: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState<{days: number, hours: number, minutes: number, seconds: number}>({ days: 0, hours: 0, minutes: 0, seconds: 0 });

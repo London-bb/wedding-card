@@ -1,18 +1,18 @@
 import React from 'react';
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import InvitationText from './components/InvitationText';
-import Gallery from './components/Gallery';
-import Location from './components/Location';
-import Countdown from './components/Countdown';
-import Calendar from './components/Calendar';
-import FallingPetals from './components/FallingPetals';
-import GuestbookAI from './components/GuestbookAI';
-import Accounts from './components/Accounts';
-import ContactHost from './components/ContactHost';
-import ShareButton from './components/ShareButton';
-import BackgroundMusic from './components/BackgroundMusic';
-import Footer from './components/Footer';
+import Navbar from '@/components/Navbar';
+import Hero from '@/components/Hero';
+import InvitationText from '@/components/InvitationText';
+import Gallery from '@/components/Gallery';
+import Location from '@/components/Location';
+import Countdown from '@/components/Countdown';
+import Calendar from '@/components/Calendar';
+import FallingPetals from '@/components/FallingPetals';
+import GuestbookAI from '@/components/GuestbookAI';
+import Accounts from '@/components/Accounts';
+import ContactHost from '@/components/ContactHost';
+import ShareButton from '@/components/ShareButton';
+import BackgroundMusic from '@/components/BackgroundMusic';
+import Footer from '@/components/Footer';
 
 function App() {
   return (

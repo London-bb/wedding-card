@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { GROOM_ACCOUNTS, BRIDE_ACCOUNTS } from '../constants';
-import { BankAccount } from '../types';
+import { GROOM_ACCOUNTS, BRIDE_ACCOUNTS } from '@/config/constants';
+import { BankAccount } from '@/types/types';
 import { ChevronDown, ChevronUp, Copy } from 'lucide-react';
 
 const AccountItem: React.FC<{ account: BankAccount }> = ({ account }) => {

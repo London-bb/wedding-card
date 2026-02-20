@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { GALLERY_IMAGES } from '../constants';
+import { GALLERY_IMAGES } from '@/config/constants';
 import { X, ChevronLeft, ChevronRight, ZoomIn, Loader2 } from 'lucide-react';
 
 const Gallery: React.FC = () => {

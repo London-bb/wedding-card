@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Heart, MessageCircle } from 'lucide-react';
-import { COUPLE, WEDDING_DATE, LOCATION } from '../constants';
+import { COUPLE, WEDDING_DATE, LOCATION } from '@/config/constants';
 
 declare global {
   interface Window {
