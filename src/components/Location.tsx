@@ -27,19 +27,24 @@ const Location: React.FC = () => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (activeTab === 'kakao' && window.kakao?.maps) {
-      window.kakao.maps.load(() => {
-        if (!mapContainerRef.current) return;
+    let timer: NodeJS.Timeout;
 
-        // 기존 지도 제거 (중복 생성 방지)
-        mapContainerRef.current.innerHTML = '';
+    const initMap = () => {
+      if (!window.kakao || !window.kakao.maps) return;
+
+      window.kakao.maps.load(() => {
+        const container = document.getElementById('kakao-map');
+        if (!container) return;
+
+        // 기존 내용 청소
+        container.innerHTML = '';
 
         const options = {
           center: new window.kakao.maps.LatLng(LOCATION.lat, LOCATION.lng),
           level: 4,
         };
 
-        const map = new window.kakao.maps.Map(mapContainerRef.current, options);
+        const map = new window.kakao.maps.Map(container, options);
 
         // 마커 표시
         const markerPosition = new window.kakao.maps.LatLng(LOCATION.lat, LOCATION.lng);
@@ -52,15 +57,39 @@ const Location: React.FC = () => {
         const customOverlay = new window.kakao.maps.CustomOverlay({
           position: markerPosition,
           content: OVERLAY_CONTENT(LOCATION.name),
-          yAnchor: 2.4, // 마커보다 훨씬 위에 표시
+          yAnchor: 2.4,
         });
         customOverlay.setMap(map);
 
         // 줌 컨트롤 추가
         const zoomControl = new window.kakao.maps.ZoomControl();
         map.addControl(zoomControl, window.kakao.maps.ControlPosition.RIGHT);
+
+        // 지도 크기 재계산 (React 렌더링 타이밍 이슈 방지)
+        setTimeout(() => {
+          map.relayout();
+          map.setCenter(markerPosition);
+        }, 100);
       });
+    };
+
+    if (activeTab === 'kakao') {
+      if (window.kakao && window.kakao.maps) {
+        initMap();
+      } else {
+        // SDK가 로드될 때까지 재시도
+        timer = setInterval(() => {
+          if (window.kakao && window.kakao.maps) {
+            initMap();
+            clearInterval(timer);
+          }
+        }, 200);
+      }
     }
+
+    return () => {
+      if (timer) clearInterval(timer);
+    };
   }, [activeTab]);
 
   return (
@@ -105,7 +134,7 @@ const Location: React.FC = () => {
           className="bg-white p-0 shadow-md rounded-2xl mb-8 overflow-hidden h-[300px] md:h-[400px] lg:h-[500px] w-full relative border border-stone-100"
         >
           {activeTab === 'kakao' ? (
-            <div ref={mapContainerRef} className="w-full h-full bg-stone-100" />
+            <div id="map" className="w-full h-full bg-stone-100" style={{ minHeight: '300px' }} />
           ) : (
             <iframe
               src={LOCATION.mapUrl}
