@@ -36,7 +36,7 @@ export const INVITATION_TEXT = `
   꽃처럼 함초롬하게 빛날 수 있도록 축복해 주십시오.
 `;
 
-export const COVER_IMAGE = '/images/flower2.jpg';
+export const COVER_IMAGE = './images/flower2.jpg';
 
 /**
  * 📸 갤러리 사진 설정
@@ -89,7 +89,7 @@ const PHOTO_FILES = [
 
 export const GALLERY_IMAGES: GalleryImage[] = PHOTO_FILES.map((file, index) => ({
   id: index + 1,
-  url: `/images/${file}`,
+  url: `./images/${file}`,
   alt: `웨딩 사진 ${index + 1}`,
 }));
 

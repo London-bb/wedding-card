@@ -28,7 +28,7 @@ const Footer: React.FC = () => {
       content: {
         title: `${groomName} ♥ ${brideName} 결혼합니다`,
         description: `${WEDDING_DATE.getFullYear()}년 ${WEDDING_DATE.getMonth() + 1}월 ${WEDDING_DATE.getDate()}일\n${LOCATION.name}`,
-        imageUrl: 'https://picsum.photos/800/1200?random=10', // Using existing hero-like image
+        imageUrl: `${window.location.origin}${window.location.pathname}images/flower2.jpg`,
         link: {
           mobileWebUrl: window.location.href,
           webUrl: window.location.href,
