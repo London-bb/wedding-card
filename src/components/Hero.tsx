@@ -22,7 +22,7 @@ const Hero: React.FC = () => {
         className="absolute inset-0 bg-cover bg-center bg-no-repeat bg-fixed transform scale-105"
         style={{ backgroundImage: `url(${COVER_IMAGE})` }}
       >
-        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 bg-black/30 backdrop-blur-[1px]" />
       </div>
 
       {/* Content */}
