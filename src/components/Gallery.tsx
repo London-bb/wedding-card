@@ -1,76 +1,162 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { GALLERY_IMAGES } from '@/config/constants';
 import { X, ChevronLeft, ChevronRight, ZoomIn, Loader2 } from 'lucide-react';
 
+interface GridItemProps {
+  img: typeof GALLERY_IMAGES[0];
+  index: number;
+  onOpen: (index: number, isSingle?: boolean) => void;
+  orientation: 'landscape' | 'portrait' | 'square' | undefined;
+  isLoaded: boolean;
+  onLoad: (id: number) => void;
+  getBentoSpan: (imgId: number) => string;
+  isSingleRequest?: boolean;
+}
+
+const GridItem: React.FC<GridItemProps> = ({ img, index, onOpen, orientation, isLoaded, onLoad, getBentoSpan, isSingleRequest }) => (
+  <div
+    className={`relative overflow-hidden group cursor-pointer border border-stone-100 ${getBentoSpan(img.id)} ${orientation === 'portrait' ? 'min-h-[280px]' : 'min-h-[140px]'}`}
+    onClick={() => onOpen(index, isSingleRequest)}
+  >
+    {!isLoaded && (
+      <div className="absolute inset-0 bg-stone-100 animate-pulse" />
+    )}
+    <img
+      src={img.url}
+      alt={img.alt}
+      className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:brightness-90 ${isLoaded && orientation ? 'opacity-100' : 'opacity-0'}`}
+      loading="lazy"
+      onLoad={() => onLoad(img.id)}
+    />
+    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-black/5 pointer-events-none">
+      <div className="bg-white/20 backdrop-blur-sm p-3 rounded-full border border-white/30 shadow-xl">
+        <ZoomIn className="text-white drop-shadow-md" size={24} />
+      </div>
+    </div>
+  </div>
+);
+
 const Gallery: React.FC = () => {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [isSingleView, setIsSingleView] = useState(false);
   const [lightboxLoaded, setLightboxLoaded] = useState(false);
-  const [gridLoaded, setGridLoaded] = useState<boolean[]>(
-    () => new Array(GALLERY_IMAGES.length).fill(false)
-  );
+  const [gridLoaded, setGridLoaded] = useState<Record<number, boolean>>({});
   const touchStartX = useRef<number | null>(null);
   const thumbStripRef = useRef<HTMLDivElement>(null);
 
-  // Pagination
-  const [visibleCount, setVisibleCount] = useState(9);
+  // State for specialized landing view
+  const [isLandingOpen, setIsLandingOpen] = useState(false);
 
-  const showMoreImages = () => {
-    setVisibleCount(prev => Math.min(prev + 9, GALLERY_IMAGES.length));
+  // Bento Grid with Orientation Detection (global for all images)
+  const [orientations, setOrientations] = useState<Record<number, 'landscape' | 'portrait' | 'square'>>({});
+
+  useEffect(() => {
+    GALLERY_IMAGES.forEach(img => {
+      if (orientations[img.id]) return;
+      const i = new Image();
+      i.src = img.url;
+      i.onload = () => {
+        const ratio = i.width / i.height;
+        let orientation: 'landscape' | 'portrait' | 'square';
+        if (ratio > 1.25) orientation = 'landscape';
+        else if (ratio < 0.8) orientation = 'portrait';
+        else orientation = 'square';
+        setOrientations(prev => ({ ...prev, [img.id]: orientation }));
+      };
+    });
+  }, [orientations]);
+
+  // History management
+  useEffect(() => {
+    const handlePopState = () => {
+      if (isLandingOpen) setIsLandingOpen(false);
+      if (lightboxIndex !== null) setLightboxIndex(null);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [isLandingOpen, lightboxIndex]);
+
+  const openLanding = () => {
+    setIsLandingOpen(true);
+    window.history.pushState({ gallery: 'landing' }, '');
   };
 
-  const openLightbox = (index: number) => {
+  const closeLanding = () => {
+    setIsLandingOpen(false);
+    if (window.history.state?.gallery === 'landing') window.history.back();
+  };
+
+  const openLightbox = (index: number, single: boolean = false) => {
     setLightboxLoaded(false);
+    setIsSingleView(single);
     setLightboxIndex(index);
   };
 
-  const closeLightbox = () => setLightboxIndex(null);
+  const closeLightbox = () => {
+    setLightboxIndex(null);
+    setIsSingleView(false);
+  };
+
+  const getBentoSpan = (imgId: number) => {
+    const orientation = orientations[imgId];
+    if (orientation === 'landscape') return 'col-span-2 row-span-1';
+    if (orientation === 'portrait') return 'col-span-1 row-span-2';
+    return 'col-span-1 row-span-1';
+  };
 
   const goPrev = useCallback(() => {
-    if (lightboxIndex === null) return;
+    if (lightboxIndex === null || isSingleView) return;
     setLightboxLoaded(false);
     setLightboxIndex((lightboxIndex - 1 + GALLERY_IMAGES.length) % GALLERY_IMAGES.length);
-  }, [lightboxIndex]);
+  }, [lightboxIndex, isSingleView]);
 
   const goNext = useCallback(() => {
-    if (lightboxIndex === null) return;
+    if (lightboxIndex === null || isSingleView) return;
     setLightboxLoaded(false);
     setLightboxIndex((lightboxIndex + 1) % GALLERY_IMAGES.length);
-  }, [lightboxIndex]);
+  }, [lightboxIndex, isSingleView]);
 
-  // 키보드 네비게이션
   useEffect(() => {
-    if (lightboxIndex === null) return;
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') goPrev();
-      else if (e.key === 'ArrowRight') goNext();
-      else if (e.key === 'Escape') closeLightbox();
+      if (lightboxIndex !== null) {
+        if (!isSingleView) {
+          if (e.key === 'ArrowLeft') goPrev();
+          else if (e.key === 'ArrowRight') goNext();
+        }
+        if (e.key === 'Escape') closeLightbox();
+      } else if (isLandingOpen && e.key === 'Escape') {
+        closeLanding();
+      }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [lightboxIndex, goPrev, goNext]);
+  }, [lightboxIndex, isLandingOpen, isSingleView, goPrev, goNext]);
 
-  // Lightbox 열릴 때 body 스크롤 막기
   useEffect(() => {
-    document.body.style.overflow = lightboxIndex !== null ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
-  }, [lightboxIndex]);
+    const shouldLock = lightboxIndex !== null || isLandingOpen;
+    document.body.style.overflow = shouldLock ? 'hidden' : '';
+    const navbar = document.querySelector('nav');
+    if (navbar) navbar.style.display = shouldLock ? 'none' : '';
+    return () => {
+      document.body.style.overflow = '';
+      if (navbar) navbar.style.display = '';
+    };
+  }, [lightboxIndex, isLandingOpen]);
 
-  // 썸네일 스트립 스크롤 동기화
   useEffect(() => {
-    if (lightboxIndex === null || !thumbStripRef.current) return;
+    if (lightboxIndex === null || isSingleView || !thumbStripRef.current) return;
     const strip = thumbStripRef.current;
     const thumb = strip.children[lightboxIndex] as HTMLElement;
-    if (thumb) {
-      thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-    }
-  }, [lightboxIndex]);
+    if (thumb) thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }, [lightboxIndex, isSingleView]);
 
-  // 모바일 스와이프
   const handleTouchStart = (e: React.TouchEvent) => {
+    if (isSingleView) return;
     touchStartX.current = e.touches[0].clientX;
   };
   const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX.current === null) return;
+    if (isSingleView || touchStartX.current === null) return;
     const delta = e.changedTouches[0].clientX - touchStartX.current;
     if (Math.abs(delta) > 50) {
       delta < 0 ? goNext() : goPrev();
@@ -78,169 +164,168 @@ const Gallery: React.FC = () => {
     touchStartX.current = null;
   };
 
-  const handleGridImageLoad = (index: number) => {
-    setGridLoaded(prev => {
-      const next = [...prev];
-      next[index] = true;
-      return next;
-    });
+  const handleGridImageLoad = (id: number) => {
+    setGridLoaded(prev => ({ ...prev, [id]: true }));
   };
 
+  const PREVIEW_COUNT = 12;
+  const previewImages = GALLERY_IMAGES.slice(0, PREVIEW_COUNT);
+
   return (
-    <section className="py-16 bg-stone-100">
-      {/* 섹션 헤더 */}
-      <div className="text-center mb-10 px-4">
-        <h2 className="text-3xl font-serif text-stone-800 mb-2">Gallery</h2>
-        <p className="text-stone-500 text-sm">우리의 소중한 순간들</p>
-        <div className="w-12 h-[1px] bg-stone-300 mx-auto mt-4" />
+    <section id="gallery" className="py-20 bg-stone-50 overflow-hidden">
+      <div className="text-center mb-16 px-4">
+        <h2 className="text-3xl font-serif text-stone-800 mb-3 tracking-widest uppercase">Gallery</h2>
+        <div className="w-8 h-[1px] bg-stone-300 mx-auto mb-4" />
+        <p className="text-stone-400 text-sm font-light">우리의 소중한 순간들</p>
       </div>
 
-      {/* Masonry 그리드 — CSS columns 기반, 사진 수 제한 없음 */}
-      {/* Masonry 그리드 — CSS columns 기반, 사진 수 제한 없음 */}
-      {/* Masonry 그리드 — CSS columns 기반, 사진 수 제한 없음 */}
-      <div className="px-1 sm:px-2 md:px-4">
-        <div className="masonry-grid columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-3 space-y-3">
-          {GALLERY_IMAGES.slice(0, visibleCount).map((img, index) => (
-            <div
+      <div className="max-w-4xl mx-auto px-4 sm:px-6">
+        <div className="grid grid-cols-3 grid-flow-dense gap-1.5">
+          {previewImages.map((img, idx) => (
+            <GridItem
               key={img.id}
-              className="break-inside-avoid mb-1.5 md:mb-2 overflow-hidden relative group cursor-pointer animate-fade-in-up"
-              onClick={() => openLightbox(index)}
-              style={{ borderRadius: '3px' }}
-            >
-              {/* 로딩 스켈레톤 */}
-              {!gridLoaded[index] && (
-                <div
-                  className="w-full bg-stone-200 animate-pulse"
-                  style={{ height: '200px' }}
-                />
-              )}
-              <img
-                src={img.url}
-                alt={img.alt}
-                className={`w-full h-auto block transition-all duration-500 group-hover:brightness-90 ${gridLoaded[index] ? 'opacity-100' : 'opacity-0 absolute top-0'
-                  }`}
-                loading="lazy"
-                decoding="async"
-                onLoad={() => handleGridImageLoad(index)}
-              />
-              {/* 호버 오버레이 */}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors duration-300 flex items-center justify-center pointer-events-none">
-                <ZoomIn
-                  className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 drop-shadow-xl"
-                  size={24}
-                />
-              </div>
-            </div>
+              img={img}
+              index={idx}
+              onOpen={openLightbox}
+              orientation={orientations[img.id]}
+              isLoaded={gridLoaded[img.id] || false}
+              onLoad={handleGridImageLoad}
+              getBentoSpan={getBentoSpan}
+              isSingleRequest={true} // 메인 그리드에서는 단일 보기로 시작
+            />
           ))}
         </div>
-      </div>
 
-      {/* 더 보기 버튼 */}
-      {visibleCount < GALLERY_IMAGES.length && (
-        <div className="text-center mt-8 pb-4">
+        <div className="mt-12 text-center">
           <button
-            onClick={showMoreImages}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-white border border-stone-200 rounded-full text-stone-600 font-medium text-sm hover:bg-rose-50 hover:text-rose-500 hover:border-rose-200 transition-all shadow-sm hover:shadow-md active:scale-95"
+            onClick={openLanding}
+            className="inline-flex items-center gap-2 px-10 py-4 border border-stone-200 rounded-full text-stone-600 text-[11px] tracking-[0.2em] font-light hover:bg-stone-800 hover:text-white hover:border-stone-800 transition-all duration-500 group shadow-sm bg-white"
           >
-            <span>더 많은 사진 보기</span>
-            <span className="text-xs text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded-md">
-              {Math.min(visibleCount + 9, GALLERY_IMAGES.length)} / {GALLERY_IMAGES.length}
-            </span>
+            SEE MORE
+            <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
-      )}
+      </div>
 
-      {/* ─── Lightbox ─── */}
-      {lightboxIndex !== null && (
-        <div
-          className="fixed inset-0 z-50 bg-black/97 flex flex-col"
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-        >
-          {/* 상단 바: 카운터 + 닫기 */}
-          <div className="flex items-center justify-between px-4 py-3 flex-shrink-0">
-            <span className="text-white/60 text-sm tabular-nums">
-              {lightboxIndex + 1} / {GALLERY_IMAGES.length}
-            </span>
-            <button
-              className="text-white/70 hover:text-white transition-colors p-2 -mr-2"
-              onClick={closeLightbox}
-              aria-label="닫기"
+      {typeof document !== 'undefined' && createPortal(
+        <>
+          {isLandingOpen && (
+            <div className="fixed inset-0 z-[1000] bg-white overflow-y-auto animate-slideUp">
+              <div className="sticky top-0 z-[1010] bg-white/95 backdrop-blur-md px-5 py-4 border-b border-stone-100 flex items-center justify-between shadow-sm">
+                <h3 className="text-lg font-serif tracking-widest text-stone-800 uppercase">Gallery</h3>
+                <button
+                  onClick={closeLanding}
+                  className="flex items-center gap-2 text-[11px] tracking-widest text-stone-500 hover:text-stone-900 transition-colors"
+                >
+                  <span className="font-light">CLOSE</span>
+                  <X size={20} strokeWidth={1.5} />
+                </button>
+              </div>
+
+              <div className="max-w-5xl mx-auto px-4 py-12 pb-32">
+                <div className="grid grid-cols-3 grid-flow-dense gap-2 md:gap-3">
+                  {GALLERY_IMAGES.map((img, idx) => (
+                    <GridItem
+                      key={img.id}
+                      img={img}
+                      index={idx}
+                      onOpen={openLightbox}
+                      orientation={orientations[img.id]}
+                      isLoaded={gridLoaded[img.id] || false}
+                      onLoad={handleGridImageLoad}
+                      getBentoSpan={getBentoSpan}
+                      isSingleRequest={false} // 전체 갤러리에서는 탐색 가능하게
+                    />
+                  ))}
+                </div>
+                <div className="mt-20 text-center">
+                  <p className="text-stone-300 text-[10px] tracking-[0.2em] mb-6 uppercase">Our Wedding Days</p>
+                  <button
+                    onClick={closeLanding}
+                    className="px-12 py-4.5 bg-stone-900 text-white rounded-full text-xs tracking-[0.3em] font-light hover:bg-stone-800 transition-all shadow-2xl active:scale-95 uppercase"
+                  >
+                    Back to Invitation
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {lightboxIndex !== null && (
+            <div
+              className={`fixed inset-0 z-[2000] flex flex-col ${isSingleView ? 'bg-black/90 backdrop-blur-sm' : 'bg-black'}`}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
             >
-              <X size={24} />
-            </button>
-          </div>
+              <div className="flex items-center justify-between px-4 py-3 flex-shrink-0 z-[2010]">
+                {!isSingleView ? (
+                  <span className="text-white/60 text-sm tabular-nums">
+                    {lightboxIndex + 1} / {GALLERY_IMAGES.length}
+                  </span>
+                ) : <div />}
+                <button
+                  className="text-white/70 hover:text-white transition-colors p-2 bg-white/10 rounded-full"
+                  onClick={closeLightbox}
+                >
+                  <X size={24} />
+                </button>
+              </div>
 
-          {/* 이미지 영역 */}
-          <div className="flex-1 flex items-center justify-center relative min-h-0 px-12 md:px-16">
-            {/* 이전 버튼 */}
-            <button
-              className="absolute left-1 md:left-4 text-white/50 hover:text-white transition-colors p-2 z-10"
-              onClick={goPrev}
-              aria-label="이전 사진"
-            >
-              <ChevronLeft size={32} />
-            </button>
+              <div className="flex-1 flex items-center justify-center relative px-4 md:px-16 overflow-hidden">
+                {!isSingleView && (
+                  <>
+                    <button
+                      className="absolute left-2 text-white/40 hover:text-white transition-colors p-2 z-20 hidden md:block"
+                      onClick={goPrev}
+                    >
+                      <ChevronLeft size={40} />
+                    </button>
+                    <button
+                      className="absolute right-2 text-white/40 hover:text-white transition-colors p-2 z-20 hidden md:block"
+                      onClick={goNext}
+                    >
+                      <ChevronRight size={40} />
+                    </button>
+                  </>
+                )}
 
-            {/* 고해상도 이미지 + 로딩 스피너 */}
-            <div className="relative flex items-center justify-center w-full h-full">
-              {!lightboxLoaded && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Loader2 className="text-white/40 animate-spin" size={36} />
+                <div className="relative flex items-center justify-center w-full h-full p-4">
+                  {!lightboxLoaded && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Loader2 className="text-white/20 animate-spin" size={40} />
+                    </div>
+                  )}
+                  <img
+                    key={lightboxIndex}
+                    src={GALLERY_IMAGES[lightboxIndex].url}
+                    alt={GALLERY_IMAGES[lightboxIndex].alt}
+                    className={`max-h-full max-w-full object-contain transition-opacity duration-300 shadow-2xl ${lightboxLoaded ? 'opacity-100' : 'opacity-0'}`}
+                    onLoad={() => setLightboxLoaded(true)}
+                  />
+                </div>
+              </div>
+
+              {!isSingleView && (
+                <div
+                  ref={thumbStripRef}
+                  className="flex-shrink-0 flex gap-2 px-4 py-6 overflow-x-auto no-scrollbar bg-black/40 backdrop-blur-sm"
+                >
+                  {GALLERY_IMAGES.map((img, i) => (
+                    <button
+                      key={img.id}
+                      onClick={() => { setLightboxLoaded(false); setLightboxIndex(i); }}
+                      className={`flex-shrink-0 rounded-sm overflow-hidden border-2 transition-all ${i === lightboxIndex ? 'border-white scale-110' : 'border-transparent opacity-40 hover:opacity-100'}`}
+                      style={{ width: '50px', height: '50px' }}
+                    >
+                      <img src={img.url} alt="" className="w-full h-full object-cover" loading="lazy" />
+                    </button>
+                  ))}
                 </div>
               )}
-              <img
-                key={lightboxIndex} // key 변경으로 이미지 재마운트 → onLoad 재발동
-                src={GALLERY_IMAGES[lightboxIndex].url}
-                alt={GALLERY_IMAGES[lightboxIndex].alt}
-                className={`max-h-full max-w-full object-contain select-none transition-opacity duration-300 ${lightboxLoaded ? 'opacity-100' : 'opacity-0'
-                  }`}
-                draggable={false}
-                onLoad={() => setLightboxLoaded(true)}
-                style={{ maxHeight: 'calc(100vh - 160px)' }}
-              />
             </div>
-
-            {/* 다음 버튼 */}
-            <button
-              className="absolute right-1 md:right-4 text-white/50 hover:text-white transition-colors p-2 z-10"
-              onClick={goNext}
-              aria-label="다음 사진"
-            >
-              <ChevronRight size={32} />
-            </button>
-          </div>
-
-          {/* 썸네일 스트립 */}
-          <div
-            ref={thumbStripRef}
-            className="flex-shrink-0 flex gap-1.5 px-4 py-3 overflow-x-auto no-scrollbar"
-          >
-            {GALLERY_IMAGES.map((img, i) => (
-              <button
-                key={img.id}
-                onClick={() => {
-                  setLightboxLoaded(false);
-                  setLightboxIndex(i);
-                }}
-                className={`flex-shrink-0 rounded overflow-hidden border-2 transition-all duration-200 ${i === lightboxIndex
-                  ? 'border-white opacity-100 scale-105'
-                  : 'border-transparent opacity-35 hover:opacity-60'
-                  }`}
-                style={{ width: '48px', height: '48px' }}
-                aria-label={`${i + 1}번째 사진으로 이동`}
-              >
-                <img
-                  src={img.url}
-                  alt=""
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </button>
-            ))}
-          </div>
-        </div>
+          )}
+        </>,
+        document.body
       )}
     </section>
   );

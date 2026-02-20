@@ -38,12 +38,6 @@ export const INVITATION_TEXT = `
 
 export const COVER_IMAGE = './images/flower2.jpg';
 
-/**
- * 📸 갤러리 사진 설정
- * 사진을 추가하려면 PHOTO_FILES 배열에 파일명만 추가하세요.
- * 파일은 public/images/ 폴더에 넣어주세요.
- * 예: 'photo-7.jpg', 'outdoor-01.jpg', 'indoor-02.jpg'
- */
 const PHOTO_FILES = [
   'blackwall1.jpg',
   'blackwall2.jpg',

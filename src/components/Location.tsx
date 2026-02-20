@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { LOCATION } from '@/config/constants';
-import { MapPin, Navigation } from 'lucide-react';
+import { MapPin, Navigation, MessageCircle } from 'lucide-react';
 
 // 카카오맵 커스텀 오버레이 내용 (HTML 문자열)
 // 스타일을 JS 문자열로 주입해야 하는 라이브러리 제약상 여기서 관리
@@ -171,7 +171,7 @@ const Location: React.FC = () => {
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 bg-[#FEE500] text-[#3C1E1E] px-5 py-2.5 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all text-sm font-bold"
               >
-                <img src="https://t1.kakaocdn.net/kakaocorp/kakaocorp/admin/service/a2a8c78b017800001.png" alt="Kakao" className="w-5 h-5 object-contain" />
+                <MessageCircle size={20} fill="currentColor" className="shrink-0" />
                 카카오맵
               </a>
             )}

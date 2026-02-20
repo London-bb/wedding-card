@@ -8,8 +8,7 @@ import Countdown from '@/components/Countdown';
 import Calendar from '@/components/Calendar';
 import FallingPetals from '@/components/FallingPetals';
 import GuestbookAI from '@/components/GuestbookAI';
-import Accounts from '@/components/Accounts';
-import ContactHost from '@/components/ContactHost';
+import ContactAndAccounts from '@/components/ContactAndAccounts';
 import ShareButton from '@/components/ShareButton';
 import BackgroundMusic from '@/components/BackgroundMusic';
 import Footer from '@/components/Footer';
@@ -52,10 +51,7 @@ function App() {
               <Location />
             </div>
             <div className="mt-12 lg:mt-0 lg:col-span-1 lg:flex lg:flex-col lg:justify-center">
-              <ContactHost />
-              <div className="mt-8">
-                <Accounts />
-              </div>
+              <ContactAndAccounts />
             </div>
           </div>
         </section>

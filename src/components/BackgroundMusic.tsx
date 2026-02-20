@@ -7,11 +7,33 @@ const BackgroundMusic: React.FC = () => {
 
     // Helper to ensure only one instance plays
     useEffect(() => {
-        audioRef.current = new Audio('https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8a73467.mp3?filename=piano-moment-11993.mp3');
+        audioRef.current = new Audio('/music/Whispering_Small_Island.wav');
         audioRef.current.loop = true;
-        audioRef.current.volume = 0.5;
+        audioRef.current.volume = 0.4;
+
+        // Browser autoplay policy workaround - play on first interaction
+        const handleAutoPlay = () => {
+            if (audioRef.current && !isPlaying) {
+                audioRef.current.play()
+                    .then(() => {
+                        setIsPlaying(true);
+                        // Remove listeners once playing
+                        window.removeEventListener('click', handleAutoPlay);
+                        window.removeEventListener('scroll', handleAutoPlay);
+                        window.removeEventListener('touchstart', handleAutoPlay);
+                    })
+                    .catch(e => console.log("Autoplay blocked, waiting for interaction", e));
+            }
+        };
+
+        window.addEventListener('click', handleAutoPlay);
+        window.addEventListener('scroll', handleAutoPlay);
+        window.addEventListener('touchstart', handleAutoPlay);
 
         return () => {
+            window.removeEventListener('click', handleAutoPlay);
+            window.removeEventListener('scroll', handleAutoPlay);
+            window.removeEventListener('touchstart', handleAutoPlay);
             if (audioRef.current) {
                 audioRef.current.pause();
                 audioRef.current = null;

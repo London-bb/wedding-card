@@ -12,8 +12,8 @@ const InvitationText: React.FC = () => {
 
         <h2 className="text-3xl font-serif text-stone-800 mb-6">당신을 초대합니다.</h2>
 
-        <p className="whitespace-pre-line text-stone-600 leading-loose font-light text-lg">
-          {INVITATION_TEXT}
+        <p className="whitespace-pre-wrap break-keep text-stone-600 leading-loose font-light text-lg">
+          {INVITATION_TEXT.trim()}
         </p>
 
         <div className="mt-12 pt-12 border-t border-stone-200">

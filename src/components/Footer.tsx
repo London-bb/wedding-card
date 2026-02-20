@@ -74,7 +74,7 @@ const Footer: React.FC = () => {
         © 2026 {COUPLE.groom.firstName} & {COUPLE.bride.firstName}. All rights reserved.
       </p>
       <p className="text-stone-300 text-[10px] mt-2">
-        Designed by {COUPLE.groom.name}{COUPLE.groom.firstName}
+        Designed by {COUPLE.groom.name}{COUPLE.groom.firstName} | Music by Smilegate
       </p>
     </footer>
   );
