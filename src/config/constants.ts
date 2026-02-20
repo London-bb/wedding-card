@@ -36,8 +36,9 @@ export const INVITATION_TEXT = `
   꽃처럼 함초롬하게 빛날 수 있도록 축복해 주십시오.
 `;
 
-export const COVER_IMAGE = './images/flower2.jpg';
+export const COVER_MUSIC = './music/Whispering_Small_Island.wav';
 
+export const COVER_IMAGE = './images/flower2.jpg';
 const PHOTO_FILES = [
   'blackwall1.jpg',
   'blackwall2.jpg',

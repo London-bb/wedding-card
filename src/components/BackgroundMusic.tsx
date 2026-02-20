@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Music, Pause } from 'lucide-react';
+import { COVER_MUSIC } from '@/config/constants';
 
 const BackgroundMusic: React.FC = () => {
     const [isPlaying, setIsPlaying] = useState(false);
@@ -7,7 +8,7 @@ const BackgroundMusic: React.FC = () => {
 
     // Helper to ensure only one instance plays
     useEffect(() => {
-        audioRef.current = new Audio('/music/Whispering_Small_Island.wav');
+        audioRef.current = new Audio(COVER_MUSIC);
         audioRef.current.loop = true;
         audioRef.current.volume = 0.4;
 
