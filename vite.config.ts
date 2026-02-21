@@ -19,15 +19,11 @@ export default defineConfig(({ mode }) => {
         transformIndexHtml(html) {
           return html.replace(
             'KAKAO_API_KEY_PLACEHOLDER',
-            env.KAKAO_JAVASCRIPT_KEY || env.VITE_KAKAO_JAVASCRIPT_KEY || ''
+            env.VITE_KAKAO_JAVASCRIPT_KEY || ''
           );
         }
       }
     ],
-    define: {
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-      'process.env.KAKAO_JAVASCRIPT_KEY': JSON.stringify(env.KAKAO_JAVASCRIPT_KEY)
-    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),

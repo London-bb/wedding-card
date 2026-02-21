@@ -39,3 +39,31 @@ export const saveMessage = async (name: string, message: string): Promise<boolea
         return false;
     }
 };
+
+/**
+ * 방명록 메시지를 Google Sheet에서 가져옵니다.
+ * @returns 메시지 배열 (GuestMessage[])
+ */
+export const fetchMessages = async (): Promise<GuestMessage[]> => {
+    if (!GOOGLE_SHEET_URL) {
+        console.error("Google Sheet URL is not configured in .env.local");
+        return [];
+    }
+
+    try {
+        const response = await fetch(GOOGLE_SHEET_URL, {
+            method: "GET",
+            // GET 요청은 기본적으로 JSON 데이터를 받아올 수 있도록 처리됩니다.
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return Array.isArray(data) ? data : [];
+    } catch (error) {
+        console.error("Failed to fetch messages from Google Sheet:", error);
+        return [];
+    }
+};

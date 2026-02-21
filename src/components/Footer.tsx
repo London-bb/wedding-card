@@ -14,7 +14,7 @@ const Footer: React.FC = () => {
 
   useEffect(() => {
     // Initialize Kakao SDK
-    const kakaoKey = process.env.KAKAO_JAVASCRIPT_KEY;
+    const kakaoKey = import.meta.env.VITE_KAKAO_JAVASCRIPT_KEY || process.env.KAKAO_JAVASCRIPT_KEY;
     if (window.Kakao && !window.Kakao.isInitialized() && kakaoKey) {
       window.Kakao.init(kakaoKey);
     }
